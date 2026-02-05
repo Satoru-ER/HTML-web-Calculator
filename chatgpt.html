@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>OJISAN++ 電卓</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top, #e0f4ff 0%, #ffffff 40%, #dde1f0 100%);
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+h1 { margin-bottom: 10px; color:#222; text-shadow:0 2px 6px rgba(0,0,0,0.15); }
+.calc { width: 360px; padding:20px; border-radius:20px; background:rgba(255,255,255,0.3); backdrop-filter:blur(12px); box-shadow:0 12px 32px rgba(0,0,0,0.2); }
+#display { width:100%; height:60px; background:rgba(255,255,255,0.85); border-radius:12px; font-size:28px; text-align:right; padding:10px; margin-bottom:15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); overflow:hidden; }
+.buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+button { padding:18px; font-size:20px; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(135deg,#fdfbfb,#ebedee); box-shadow:0 4px 10px rgba(0,0,0,0.15); transition:0.15s; }
+button.op { background:linear-gradient(135deg,#6dd5fa,#2980b9); color:white; }
+button:hover { transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+
+<h1>OJISAN++ 電卓</h1>
+<div class="calc">
+  <div id="display">0</div>
+  <div class="buttons">
+    <button onclick="press('7')">7</button>
+    <button onclick="press('8')">8</button>
+    <button onclick="press('9')">9</button>
+    <button class="op" onclick="press('/')">÷</button>
+
+    <button onclick="press('4')">4</button>
+    <button onclick="press('5')">5</button>
+    <button onclick="press('6')">6</button>
+    <button class="op" onclick="press('*')">×</button>
+
+    <button onclick="press('1')">1</button>
+    <button onclick="press('2')">2</button>
+    <button onclick="press('3')">3</button>
+    <button class="op" onclick="press('-')">−</button>
+
+    <button onclick="press('0')">0</button>
+    <button onclick="clearExpr()">C</button>
+    <button class="op" onclick="calculate()">＝</button>
+    <button class="op" onclick="press('+')">＋</button>
+  </div>
+
+  <h3>生成OJISAN++コード</h3>
+  <pre id="ojisanCode" style="background:rgba(255,255,255,0.8); padding:10px; border-radius:12px; min-height:80px; overflow:auto;"></pre>
+</div>
+
+<script>
+let expr = "";
+
+// 表示更新
+function updateDisplay() {
+  document.getElementById("display").textContent = expr || "0";
+  generateOjisan();
+}
+
+// ボタン押下
+function press(v) {
+  expr += v;
+  updateDisplay();
+}
+
+// クリア
+function clearExpr() {
+  expr = "";
+  updateDisplay();
+  document.getElementById("ojisanCode").textContent = "";
+}
+
+// = 押下
+function calculate() {
+  if (!expr) return;
+  try {
+    const code = generateOjisan(true);
+    expr = runOjisan(code);
+    updateDisplay();
+  } catch (e) {
+    expr = "";
+    updateDisplay();
+    document.getElementById("ojisanCode").textContent = "エラー: " + e.message;
+  }
+}
+
+// OJISAN++コード生成
+function generateOjisan(forRun=false) {
+  const code = `
+○○チャン、お疲れ様〜😊❗
+僕の答えを紹介するネ（写真つき）📸
+答え は、オジサンのものだヨ💗 ${expr}
+吐いちゃうゾ😅 答え
+風呂入ってくるネ🛁💨
+  `.trim();
+  if(!forRun) document.getElementById("ojisanCode").textContent = code;
+  return code;
+}
+
+// OJISAN++インタプリタ（簡易：代入＋出力＋算術）
+function runOjisan(source) {
+  const lines = source.split("\n").map(l=>l.trim()).filter(l=>l);
+  const vars = {};
+  const output = [];
+  for (let line of lines) {
+    if (line.includes("僕の") && line.includes("を紹介するネ")) {
+      const name = line.split("僕の")[1].split("を紹介するネ")[0].trim();
+      vars[name] = 0;
+    } else if (line.includes("は、オジサンのものだヨ")) {
+      const [left, right] = line.split("は、オジサンのものだヨ");
+      const name = left.trim();
+      const val = evalExpr(right.trim(), vars);
+      vars[name] = val;
+    } else if (line.startsWith("吐いちゃうゾ")) {
+      const name = line.split("吐いちゃうゾ")[1].trim();
+      output.push(vars[name]);
+    }
+  }
+  return output.join("\n");
+}
+
+// 式評価（+ - * / と変数のみ）
+function evalExpr(expr, vars) {
+  const replaced = expr.replace(/[A-Za-z一-龥ぁ-んァ-ン0-9_]+/g, (v)=>vars[v]!==undefined?vars[v]:v);
+  if(!/^[0-9+\-*/().\s]+$/.test(replaced)) throw "式がオジサンには難しすぎるヨ";
+  return Function("return (" + replaced + ");")();
+}
+
+</script>
+
+</body>
+</html>
