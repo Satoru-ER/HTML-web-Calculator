@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>OJISAN++ 電卓</title>
+  <style>
+    body { font-family: system-ui; margin: 20px; }
+    textarea { width: 100%; height: 150px; }
+    #execResult { font-size: 20px; margin-top: 10px; }
+    #errorArea { color: red; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>OJISAN++ 電卓</h1>
+
+  <input id="exprInput" placeholder="式を入力 (例: 7+5*2)" style="width:100%; font-size:20px;">
+  <h3>生成された OJISAN++ コード</h3>
+  <textarea id="ojisanCode" readonly></textarea>
+
+  <button id="runBtn">実行</button>
+
+  <h3>実行結果</h3>
+  <div id="execResult"></div>
+  <div id="errorArea"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
